@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace MondoDataAccess.Models;
+namespace MongoDataAccess.Models;
 
 public class ChoreModel
 {

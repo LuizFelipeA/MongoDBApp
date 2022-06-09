@@ -1,11 +1,11 @@
-﻿using MondoDataAccess.Models;
+﻿using MongoDataAccess.Models;
 using MongoDB.Driver;
 
-namespace MondoDataAccess.DataAccess;
+namespace MongoDataAccess.DataAccess;
 
 public class ChoreDataAccess
 {
-    private const string ConnectionString = "mongodb://127.0.0.1:127017";
+    private const string ConnectionString = "mongodb://127.0.0.1:27017";
 
     private const string DatabaseName = "choredb";
 
@@ -13,9 +13,9 @@ public class ChoreDataAccess
 
     private const string UserCollection = "users";
 
-    private const string ChoreHistoryCollectio = "chore_history";
+    private const string ChoreHistoryCollection = "chore_history";
 
-    private IMongoCollection<T> ConnectToMongo<T>(in string collection)
+    public IMongoCollection<T> ConnectToMongo<T>(in string collection)
     {
         var client = new MongoClient(ConnectionString);
 
@@ -24,7 +24,7 @@ public class ChoreDataAccess
         return db.GetCollection<T>(collection);
     }
 
-    private async Task<IEnumerable<UserModel>> GetAllUsers()
+    public async Task<IEnumerable<UserModel>> GetAllUsers()
     {
         var usersCollection = ConnectToMongo<UserModel>(UserCollection);
 
@@ -75,5 +75,25 @@ public class ChoreDataAccess
             filter: filter,
             replacement: chore,
             options: new ReplaceOptions { IsUpsert = true });
+    }
+
+    public Task DeleteChore(ChoreModel chore)
+    {
+        var choreColletion = ConnectToMongo<ChoreModel>(ChoreCollection);
+
+        return choreColletion.DeleteOneAsync(c => c.Id == chore.Id);
+    }
+
+    public async Task CompleteChore(ChoreModel chore)
+    {
+        var choreCollection = ConnectToMongo<ChoreModel>(ChoreCollection);
+
+        var filter = Builders<ChoreModel>.Filter.Eq("Id", chore.Id);
+
+        await choreCollection.ReplaceOneAsync(filter, chore);
+
+        var choreHistoryCollection = ConnectToMongo<ChoreHistoryModel>(ChoreHistoryCollection);
+
+        await choreHistoryCollection.InsertOneAsync(new ChoreHistoryModel(chore));
     }
 }

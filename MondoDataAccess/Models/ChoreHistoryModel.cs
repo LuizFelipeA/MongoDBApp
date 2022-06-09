@@ -1,4 +1,5 @@
-﻿namespace MondoDataAccess.Models;
+﻿namespace MongoDataAccess.Models;
+
 public class ChoreHistoryModel
 {
     public ChoreHistoryModel()
